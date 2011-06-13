@@ -1,5 +1,4 @@
 class UsersController < ApplicationController
-
   def show
     @user = User.find(params[:id])
     @title = @user.name
@@ -17,6 +16,7 @@ class UsersController < ApplicationController
       redirect_to @user
     else
       @title = "Sign up"
+      params[:user][:password] = params[:user][:password_confirmation] = ""
       render 'new'
     end
   end

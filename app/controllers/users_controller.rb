@@ -1,18 +1,26 @@
+# -*- coding: utf-8 -*-
 class UsersController < ApplicationController
   before_filter :authenticate, :only => [:index, :edit, :update, :destroy]
   before_filter :correct_user, :only => [:edit, :update]
   before_filter :admin_user,   :only => :destroy
 
+  ##
+  # userの一覧を表示する
   def index
     @title = "All users"
     @users = User.paginate(:page => params[:page])
   end
 
+  ##
+  # ログインしているuserを表示
   def show
     @user = User.find(params[:id])
+    @microposts = @user.microposts.paginate(:page => params[:page])
     @title = @user.name
   end
 
+  ##
+  # 新規user作成画面を表示する
   def new
     if signed_in?
       redirect_to root_path
@@ -22,6 +30,8 @@ class UsersController < ApplicationController
     end
   end
 
+  ##
+  # 新規userを作成する
   def create
     if signed_in?
       redirect_to root_path
@@ -39,10 +49,14 @@ class UsersController < ApplicationController
     end
   end
 
+  ##
+  # user編集画面を表示する
   def edit
     @title = "Edit user"
   end
 
+  ##
+  # user情報を更新する
   def update
     if @user.update_attributes(params[:user])
       flash[:success] = "Profile updated."
@@ -53,6 +67,8 @@ class UsersController < ApplicationController
     end
   end
 
+  ##
+  # userを破棄する
   def destroy
     user = User.find(params[:id])
     unless current_user?(user)
@@ -63,10 +79,6 @@ class UsersController < ApplicationController
   end
 
   private
-
-  def authenticate
-    deny_access unless signed_in?
-  end
 
   def correct_user
     @user = User.find(params[:id])

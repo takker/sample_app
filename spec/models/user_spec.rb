@@ -182,6 +182,69 @@ describe User do
         @user.feed.include?(mp3).should be_false
       end
     end
+
+    describe "status feed" do
+      it "should have a feed" do
+        @user.should respond_to(:feed)
+      end
+
+      it "should include user's microposts" do
+        @user.feed.should include(@mp1)
+        @user.feed.should include(@mp2)
+      end
+
+      it "should not include a different user's microposts" do
+        mp3 = Factory(:micropost, :user => Factory(:user, :email => Factory.next(:email)))
+        @user.feed.should_not include(mp3)
+      end
+
+      it "should include the microposts of followed users" do
+
+        followed = Factory(:user, :email => Factory.next(:email))
+        mp3 = Factory(:micropost, :user => followed)
+        @user.follow!(followed)
+        @user.feed.should include(mp3)
+      end
+    end
+  end
+
+  describe "relationship" do
+    before(:each) do
+      @user = User.create!(@attr)
+      @followed = Factory(:user)
+    end
+    subject do
+      @user
+    end
+
+    it { should respond_to(:relationships) }
+    it { should respond_to(:following) }
+    it { should respond_to(:following?) }
+    it { should respond_to(:follow!) }
+    it { should respond_to(:unfollow!) }
+    it { should respond_to(:reverse_relationships) }
+    it { should respond_to(:followers) }
+
+    it "should follow another user" do
+      subject.follow!(@followed)
+      subject.should be_following(@followed)
+    end
+
+    it "should include the followed user in the following array" do
+      subject.follow!(@followed)
+      subject.following.should include(@followed)
+    end
+
+    it "should include the follower in the followers array" do
+      @user.follow!(@followed)
+      @followed.followers.should include(@user)
+    end
+
+    it "should unfollow a user" do
+      subject.follow!(@followed)
+      subject.unfollow!(@followed)
+      subject.should_not be_following(@followed)
+    end
   end
 end
 
